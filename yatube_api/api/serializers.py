@@ -6,8 +6,7 @@ from rest_framework.validators import UniqueTogetherValidator
 class CommentSerializer(serializers.ModelSerializer):
     author = serializers.SlugRelatedField(
         slug_field='username',
-        queryset=User.objects.all(),
-        default=serializers.CurrentUserDefault(),
+        read_only=True,
     )
 
     class Meta:
@@ -30,14 +29,14 @@ class FollowSerializer(serializers.ModelSerializer):
     )
     user = serializers.SlugRelatedField(
         slug_field='username',
-        queryset=User.objects.all(),
         default=serializers.CurrentUserDefault(),
+        read_only=True,
     )
 
     class Meta:
         fields = (
             'following',
-            'user'
+            'user',
         )
         model = Follow
         validators = [
@@ -48,7 +47,8 @@ class FollowSerializer(serializers.ModelSerializer):
         ]
 
     def validate(self, data):
-        if data.get('following') == data.get('user'):
+        print(data)
+        if data.get('following') == self.context['request'].user:
             raise serializers.ValidationError(
                 'Нельзя подписаться на самого себя!'
             )
@@ -58,8 +58,7 @@ class FollowSerializer(serializers.ModelSerializer):
 class PostSerializer(serializers.ModelSerializer):
     author = serializers.SlugRelatedField(
         slug_field='username',
-        queryset=User.objects.all(),
-        default=serializers.CurrentUserDefault(),
+        read_only=True,
     )
 
     class Meta:

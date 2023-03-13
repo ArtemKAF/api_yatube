@@ -13,8 +13,8 @@ class Comment(models.Model):
     created = models.DateTimeField(
         verbose_name='Дата добавления',
         auto_now_add=True,
-        unique=True,
         db_index=True,
+        unique=True,
     )
     post = models.ForeignKey(
         'Post',
@@ -51,8 +51,13 @@ class Follow(models.Model):
         constraints = [
             models.UniqueConstraint(
                 fields=('following', 'user'),
-                name='following_unique',
-            )
+                name='%(app_label)s_%(class)s_unique_relationships',
+            ),
+            models.CheckConstraint(
+                check=(models.Q(user__gt=models.F('following'))
+                       | models.Q(user__lt=models.F('following'))),
+                name='%(app_label)s_%(class)s_prevent_following_yourself',
+            ),
         ]
 
     def __str__(self):
